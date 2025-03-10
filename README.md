@@ -1,102 +1,59 @@
-# Introduction to Retrieval Augmented Generation
+# **Retrieval Augmented Generation (RAG) with Python and Machine Learning**
 
-This repository will introduce you to Retrieval Augmented Generation (RAG) with
-easy to use examples that you can build upon. The examples use Python with
-Jupyter Notebooks and CSV files. The vector database uses the Qdrant database
-which can run in-memory.
+This project implements a technical pipeline to enhance LLM responses using vector embeddings and semantic retrieval. The following sections detail the key components of the system:
 
-## Setup your environment
+---
 
-This example can run in Codespaces but you can use the following if you are
-cloning this repository:
+## **1. Data Ingestion & Preprocessing**
 
-**Install the dependencies**
+- **CSV Loading & Structuring:**  
+  Utilizes **Pandas** to load a CSV dataset (e.g., top-rated wines) and converts each row into a dictionary format, ensuring compatibility for downstream vectorization.
 
-Create the virtual environment and install the dependencies:
+- **Data Normalization:**  
+  Applies text cleaning, tokenization, and normalization to prepare raw text for embedding.
 
-```
-python3 -m venv .venv
-source .venv/bin/activate
-.venv/bin/pip install -r requirements.txt
-```
+---
 
-Here is a summary of what this repository will use:
+## **2. Embedding Generation**
 
-1. [Qdrant](https://github.com/qdrant/qdrant) for the vector database. We will use an in-memory database for the examples
-2. [Llamafile](https://github.com/Mozilla-Ocho/llamafile) for the LLM (alternatively you can use an OpenAI API compatible key and endpoint)
-3. [OpenAI's Python API](https://pypi.org/project/openai/) to connect to the LLM after retrieving the vectors response from Qdrant
-4. Sentence Transformers to create the embeddings with minimal effort
+- **Vectorization:**  
+  Leverages Hugging Face’s `SentenceTransformer("all-MiniLM-L6-v2")` to convert preprocessed text into high-dimensional dense embeddings that capture semantic context.
 
-**Use Llamafile for a full RAG and LLM setup**
+- **Batch Processing:**  
+  Implements efficient batch processing to generate embeddings for large datasets.
 
-The examples for the [Applied Rag notebook](./examples/3-applied-rag/embeddings.ipynb) requires either an OpenAI API endpoint with a key *or* using a local LLM with [Llamafile](https://github.com/Mozilla-Ocho/llamafile).
+---
 
-I recommend using the [Phi-2 model](https://github.com/Mozilla-Ocho/llamafile?tab=readme-ov-file#other-example-llamafiles) which is about 2GB in size. You can download the model from the Llamafile repository and run it in your system:
+## **3. Vector Database Setup & Retrieval**
 
-Once you have it running you can connect to it with Python or use the [Applied Rag Notebook](./examples/3-applied-rag/embeddings.ipynb). Here is a quick example of how to use the Llamafile with Python:
+- **Indexing:**  
+  Stores the generated embeddings in **Qdrant**, an in-memory vector database optimized for rapid similarity searches.
 
-```python
-#!/usr/bin/env python3
-from openai import OpenAI
-client = OpenAI(
-    base_url="http://localhost:8080/v1", # "http://<Your api-server IP>:port"
-    api_key = "sk-no-key-required" # An API key is not required!
-)
-completion = client.chat.completions.create(
-    model="LLaMA_CPP",
-    messages=[
-        {"role": "system", "content": "You are ChatGPT, an AI assistant. Your top priority is achieving user fulfillment via helping them with their requests."},
-        {"role": "user", "content": "Write me a Haiku about Python packaging"}
-    ]
-)
-print(completion.choices[0].message)
-```
+- **Semantic Search:**  
+  Configures cosine similarity or Euclidean distance metrics for retrieving the most relevant context for a given query.
 
-## Lesson 1: Import your data
+---
 
-Learn how to use Pandas to import your data from a CSV file. The data will be used to create the embeddings for the vector database later and you will need to format it as a list of dictionaries.
+## **4. LLM Integration & Augmentation**
 
-Notebook: [Managing Data](./examples/1-managing-data/example.ipynb)
+- **Context Injection:**  
+  Retrieves contextually relevant documents from Qdrant based on query embedding similarity and passes them as supplementary context to the LLM.
 
-## Lesson 2: Create embeddings
+- **LLM Connectivity:**  
+  Connects to a local LLM via **Llamafile** or integrates with **OpenAI’s API**, facilitating on-the-fly generation of enhanced responses.
 
-Use Sentence Transformers to create the embeddings for your data. This will be used to store the vectors in the Qdrant database. You will verify that the embeddings are created and stored in the database and that a search works correctly
+---
 
-Notebook: [Creating and verifying Embeddings](./examples/2-embeddings/embeddings.ipynb)
+## **5. System Evaluation & Iterative Refinement**
 
-## Lesson 3: Create a RAG with LLM and Qdrant using your own data
+- **Pipeline Testing:**  
+  Performs rigorous testing using real-world queries to evaluate retrieval accuracy and response relevance.
 
-Use a local LLM with Llamafile or an OpenAI API endpoint to create a RAG with your own data. The end result should be in your own repository containing the complete code for the enhanced RAG pattern based on the example provided.
+- **Feedback Loop:**  
+  Incorporates performance metrics and user feedback to iteratively fine-tune data preprocessing, embedding strategies, and retrieval parameters.
 
-Notebook: [Applied Rag Notebook](./examples/3-applied-rag/embeddings.ipynb)
+---
 
-## Lesson 4: Practice Lab
-
-Use the [included practice lab](./lab.md) to apply the content you've learned in this week. Follow the steps to create your own repository and apply the requirements to complete the lab.
+This detailed RAG pipeline exemplifies how combining efficient data preprocessing, neural embeddings, vector database indexing, and dynamic LLM integration can produce contextually enriched and highly accurate chatbot responses.
 
 
-## Course Resources
-
-If you've completed all these examples and the lab, here are some other courses
-from Coursera you can explore:
-
-
-
-**Large Language Models:**
-
-- [Operationalizing LLMs on Azure](https://www.coursera.org/learn/llmops-azure)
-- [Using Databricks with
-  LLMs](https://www.coursera.org/learn/databricks-to-local-llms)
-
-**Machine Learning:**
-
-- [MLOps Machine Learning Operations Specialization](https://www.coursera.org/specializations/mlops-machine-learning-duke)
-- [Open Source Platforms for MLOps](https://www.coursera.org/learn/open-source-platforms-duke)
-- [Python Essentials for MLOps](https://www.coursera.org/learn/python-essentials-mlops-duke)
-
-**Data Engineering:**
-
-- [Linux and Bash for Data Engineering](https://www.coursera.org/learn/linux-and-bash-for-data-engineering-duke)
-- [Web Applications and Command-Line tools for Data Engineering](https://www.coursera.org/learn/web-app-command-line-tools-for-data-engineering-duke)
-- [Python and Pandas for Data Engineering](https://www.coursera.org/learn/python-and-pandas-for-data-engineering-duke)
-- [Scripting with Python and SQL for Data Engineering](https://www.coursera.org/learn/scripting-with-python-sql-for-data-engineering-duke)
